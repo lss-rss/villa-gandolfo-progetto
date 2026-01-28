@@ -1055,32 +1055,7 @@
             opacity: 0.4;
         }
 
-        /* Test button for install prompt */
-        .test-install-btn {
-            position: fixed;
-            bottom: 40px;
-            left: 40px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #fff;
-            font-size: 11px;
-            cursor: pointer;
-            z-index: 999;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
         
-        .test-install-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-        
-        @media (min-width: 1024px) {
-            .test-install-btn {
-                display: none;
-            }
-        }
 
         /* MOBILE LANDSCAPE */
         @media (max-width: 1024px) and (orientation: landscape) {
@@ -1371,9 +1346,6 @@
             Ruota il dispositivo in orizzontale<br>per una migliore esperienza
         </div>
     </div>
-
-    <!-- Test Install Button -->
-    <button class="test-install-btn" onclick="document.getElementById('installPrompt').classList.add('show')">📱 Test Install Prompt</button>
 
     <div class="main-content">
         <button class="index-button" id="indexButton">
