@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- CRITICAL: These make it fullscreen when added to home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Progetto Villa Gandolfo</title>
+    
+    <!-- PWA Manifest for fullscreen -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVmlsbGEgR2FuZG9sZm8iLCJzaG9ydF9uYW1lIjoiVmlsbGEiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsInN0YXJ0X3VybCI6Ii8iLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzFhMWExYSIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCJ9">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html {
+            width: 100%;
+            /* CRITICAL: Force extra height for scroll */
+            height: calc(100% + 60px);
+            overflow-x: hidden;
+        }
+        
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            background: #1a1a1a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            
+            /* CRITICAL: Extra height to force scroll */
+            width: 100%;
+            min-height: calc(100vh + 60px);
+            min-height: calc(100dvh + 60px);
+            
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Install prompt for iOS */
+        .install-prompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 99999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .install-prompt.show {
+            display: flex;
+        }
+        
+        .install-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 30px;
+        }
+        
+        .install-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: #fff;
+        }
+        
+        .install-title {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+        
+        .install-text {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.8;
+            max-width: 400px;
+            margin-bottom: 40px;
+        }
+        
+        .install-steps {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: left;
+        }
+        
+        .install-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .install-step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .install-dismiss {
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .install-dismiss:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Rotation overlay */
+        .rotate-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: #000;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        
+        @media (max-width: 1024px) and (orientation: portrait) {
+            .rotate-overlay {
+                display: flex !important;
+            }
+            
+            .main-content {
+                display: none !important;
+            }
+        }
+        
+        .rotate-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 30px;
+            animation: rotate-pulse 2s ease-in-out infinite;
+        }
+        
+        .rotate-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: #fff;
+        }
+        
+        .rotate-text {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-align: center;
+            padding: 0 40px;
+        }
+        
+        @keyframes rotate-pulse {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: rotate(90deg) scale(1.1);
+                opacity: 1;
+            }
+        }
+        
+        /* Main container - FIXED positioning */
+        .magazine-wrapper {
+            display: flex;
+            /* CRITICAL: Use window.innerHeight in JS */
+            height: 100vh;
+            height: 100dvh;
+            align-items: center;
+            padding: 50px;
+            gap: 50px;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+        
+        .page {
+            width: 1100px;
+            height: 750px;
+            min-width: 1100px;
+            min-height: 750px;
+            max-width: 1100px;
+            max-height: 750px;
+            background: #ffffff;
+            flex-shrink: 0;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        /* Clickable images with subtle hover effect */
+        .page img {
+            cursor: pointer;
+            transition: transform 0.4s ease, filter 0.4s ease, opacity 0.4s ease;
+            position: relative;
+        }
+        
+        .page img:hover {
+            transform: scale(1.02);
+            filter: brightness(1.03);
+            opacity: 0.95;
+            z-index: 10;
+        }
+        
+        /* Specific hover effects for full-page images - very subtle */
+        .page-full-img img:hover,
+        .double-img:hover,
+        .triple-img:hover {
+            transform: scale(1.01);
+            filter: brightness(1.02);
+        }
+        
+        /* Cover image - slightly more visible */
+        .cover-img:hover {
+            transform: scale(1.03);
+            filter: brightness(1.04);
+        }
+        
+        /* Material images - refined */
+        .material-item img:hover {
+            transform: scale(1.03);
+            filter: brightness(1.04);
+        }
+        
+        /* Split images - minimal */
+        .split-img img:hover {
+            transform: scale(1.015);
+            filter: brightness(1.03);
+        }
+        
+        /* Fullscreen overlay */
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .fullscreen-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .fullscreen-page {
+            max-width: 95vw;
+            max-height: 95vh;
+            max-height: 95dvh;
+            width: auto;
+            height: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        opacity 0.4s ease;
+            cursor: default;
+            position: relative;
+        }
+        
+        .fullscreen-overlay.active .fullscreen-page {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .fullscreen-page:hover {
+            transform: scale(1);
+        }
+        
+        /* Close button for fullscreen */
+        .fullscreen-close {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .fullscreen-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        .fullscreen-close::before,
+        .fullscreen-close::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 2px;
+            background: #fff;
+        }
+        
+        .fullscreen-close::before {
+            transform: rotate(45deg);
+        }
+        
+        .fullscreen-close::after {
+            transform: rotate(-45deg);
+        }
+        
+        .page-footer {
+            position: absolute;
+            bottom: 30px;
+            left: 60px;
+            right: 60px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            color: #999;
+        }
+        
+        /* Footer with background on full-image pages */
+        .page-full-img .page-footer,
+        .page-triple .page-footer,
+        .page-double .page-footer {
+            padding: 10px 20px;
+            border-radius: 4px;
+            left: 40px;
+            right: 40px;
+            bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 96px;
+            font-weight: 300;
+            line-height: 0.95;
+            letter-spacing: -2px;
+        }
+        
+        h2 {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        
+        p {
+            font-size: 11px;
+            line-height: 1.7;
+            text-align: justify;
+        }
+        
+        .page-cover {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .cover-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .logo {
+            padding-top: 450px;
+            font-size: 95px;
+            letter-spacing: -4px;
+            font-weight: 200;
+            font-family: 'Libre Baskerville';
+        }
+        
+        .cover-img {
+            width: 650px;
+            height: 480px;
+            object-fit: cover;
+            padding-top: 40px;
+            padding-right: 40px;
+        }
+        
+        .page-text h2 {
+            margin-bottom: 50px;
+            font-size: 40px;
+            letter-spacing: -2px;
+            text-transform: none;
+            font-weight: 600;
+        }
+        
+        .text-three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 80px;
+        }
+        
+        .text-three-col p {
+            margin-bottom: 10px;
+            font-size: 13px;
+            letter-spacing: -0.02em;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+        
+        .page-full-img {
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .page-full-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            flex-shrink: 0;
+            max-width: 1100px;
+            max-height: 750px;
+        }
+        
+        .img-label {
+            position: absolute;
+            top: 60px;
+            left: 60px;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 12px 24px;
+        }
+        
+        .page-split {
+            display: flex;
+            padding: 0;
+        }
+        
+        .split-text {
+            width: 45%;
+            padding: 30px 50px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .split-text h3 {
+            margin-bottom: 65px;
+            margin-top: 150px;
+            font-size: 11px;
+            letter-spacing: -0.01em;
+            text-transform: uppercase;
+            font-weight: 300;
+            font-family: "Inter", sans-serif;
+        }
+        
+        .split-text p {
+            margin-bottom: 18px;
+            font-size: 16px;
+            font-weight: 300;
+            font-family: "Inter", sans-serif;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+        
+        .split-img {
+            width: 55%;
+            height: 100%;
+        }
+        
+        .split-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .page-double {
+            padding: 0;
+            display: flex;
+            gap: 0;
+            overflow: hidden;
+        }
+        
+        .double-img {
+            width: 50%;
+            height: 100%;
+            max-height: 750px;
+            object-fit: cover;
+            flex-shrink: 0;
+            display: block;
+        }
+        
+        .page-materials {
+            padding: 50px;
+        }
+        
+        .page-materials h2 {
+            margin-bottom: 40px;
+            font-family: "Inter", sans-serif;
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            height: calc(100% - 100px);
+        }
+        
+        .material-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .material-item img {
+            width: 100%;
+            flex: 1;
+            object-fit: cover;
+            margin-bottom: 12px;
+        }
+        
+        .material-label {
+            text-transform: uppercase;
+            text-align: center;
+            font-family: "Inter", sans-serif;
+            font-size: 11px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+        
+        .page-triple {
+            padding: 0;
+            display: flex;
+            gap: 0;
+            overflow: hidden;
+        }
+        
+        .triple-img {
+            width: 33.333%;
+            height: 100%;
+            max-height: 750px;
+            object-fit: cover;
+            flex-shrink: 0;
+            display: block;
+        }
+        
+        /* Fullscreen overlay */
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 60px 80px;
+        }
+        
+        .fullscreen-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .fullscreen-content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .fullscreen-image {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            box-shadow: 0 10px 60px rgba(0,0,0,0.5);
+            display: block;
+        }
+        
+        /* Gallery navigation arrows */
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10002;
+        }
+        
+        .gallery-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .gallery-nav.active {
+            display: flex;
+        }
+        
+        .gallery-prev {
+            left: 20px;
+        }
+        
+        .gallery-next {
+            right: 20px;
+        }
+        
+        .gallery-nav svg {
+            width: 24px;
+            height: 24px;
+            fill: #fff;
+        }
+        
+        /* Gallery counter */
+        .gallery-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 14px;
+            letter-spacing: 1px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: none;
+        }
+        
+        .gallery-counter.active {
+            display: block;
+        }
+        
+        .fullscreen-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .fullscreen-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: rotate(90deg);
+        }
+        
+        .fullscreen-close::before,
+        .fullscreen-close::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background: #fff;
+        }
+        
+        .fullscreen-close::before {
+            transform: rotate(45deg);
+        }
+        
+        .fullscreen-close::after {
+            transform: rotate(-45deg);
+        }
+        
+        .page {
+            cursor: pointer;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .page:hover {
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        }
+        
+        /* Finish switcher controls */
+        .finish-controls {
+            position: absolute;
+            bottom: 50px;
+            left: 30px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .finish-btn {
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+        
+        .finish-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .finish-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            border-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Switchable image container - simplified approach */
+        .switchable-img-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .switchable-img-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            will-change: transform;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .switchable-img-container img.no-transition {
+            transition: none;
+        }
+        
+        /* Navigation */
+        .nav-dots {
+            position: fixed;
+            top: 50%;
+            right: 40px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .dot {
+            width: 4px;
+            height: 4px;
+            background: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .dot.active {
+            background: #fff;
+            height: 24px;
+        }
+        
+        .page-counter {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: 11px;
+            letter-spacing: 1px;
+            z-index: 1000;
+        }
+
+        .index-button {
+            position: fixed;
+            bottom: 40px;
+            right: 100px;
+            width: 50px;
+            height: 50px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .index-button span {
+            width: 18px;
+            height: 2px;
+            background: #888;
+            transition: all 0.3s ease;
+        }
+
+        .index-button.active span:nth-child(1) {
+            transform: rotate(45deg) translateY(7px);
+            background: #fff;
+        }
+
+        .index-button.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .index-button.active span:nth-child(3) {
+            transform: rotate(-45deg) translateY(-7px);
+            background: #fff;
+        }
+
+        .index-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            overflow-y: auto;
+            padding: 80px 40px;
+        }
+
+        .index-menu.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .index-menu-content {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .index-menu-title {
+            font-size: 36px;
+            color: #fff;
+            font-weight: 300;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+            text-align: center;
+        }
+
+        .index-menu-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .index-menu-item {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .index-menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .index-menu-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .index-menu-number {
+            font-size: 11px;
+            opacity: 0.4;
+            min-width: 40px;
+        }
+
+        .index-menu-label {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: -0.3px;
+        }
+
+        .index-menu-page {
+            font-size: 10px;
+            opacity: 0.4;
+        }
+
+        /* MOBILE LANDSCAPE */
+        @media (max-width: 1024px) and (orientation: landscape) {
+            .magazine-wrapper {
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .page {
+                width: 90vw;
+                height: 82vh;
+                height: 82dvh;
+                min-width: auto;
+                min-height: auto;
+                max-width: none;
+                max-height: none;
+                padding: 0px;
+            }
+            
+            .fullscreen-overlay {
+                padding: 40px 20px;
+            }
+            
+            .fullscreen-close {
+                top: 15px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .fullscreen-close::before,
+            .fullscreen-close::after {
+                width: 20px;
+            }
+            
+            .gallery-nav {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .gallery-prev {
+                left: 10px;
+            }
+            
+            .gallery-next {
+                right: 10px;
+            }
+            
+            .gallery-nav svg {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .gallery-counter {
+                bottom: 15px;
+                font-size: 12px;
+            }
+            
+            /* Triple images - ensure they fill properly on mobile */
+            .page-triple {
+                padding: 0;
+            }
+            
+            .triple-img {
+                width: 33.333%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .logo {
+                padding: 12vh;
+                font-size: clamp(28px, 5.5vw, 48px);
+            }
+            
+            .cover-img {
+                width: clamp(170px, 34vw, 360px);
+                height: clamp(250px, 20vh, 260px);
+                padding-top: 15px;
+                padding-right: 35px;
+            }
+            
+            h1 {
+                font-size: clamp(30px, 4.5vw, 56px);
+            }
+            
+            .page-text h2 {
+                font-size: clamp(16px, 2.2vw, 24px);
+                margin-bottom: 18px;
+            }
+            
+            .text-three-col {
+                grid-template-columns: 1fr 1fr;
+                padding: 25px;
+            }
+            
+            .text-three-col p {
+                font-size: clamp(7.5px, 1vw, 9.5px);
+            }
+            
+            .split-text {
+                padding: 100px 28px;
+            }
+            
+            .split-text h3 {
+                margin-top: 7vh;
+                margin-bottom: 2.5vh;
+                font-size: clamp(6.5px, 0.85vw, 8.5px);
+            }
+            
+            .split-text p {
+                font-size: clamp(9.5px, 1.2vw, 11.5px);
+                margin-bottom: 10px;
+            }
+            
+            .page-footer {
+                font-size: clamp(5px, 0.75vw, 7px);
+                left: 12px;
+                right: 12px;
+                bottom: 10px;
+            }
+            
+            .nav-dots {
+                right: 8px;
+                gap: 5px;
+            }
+            
+            .dot {
+                width: 3px;
+                height: 3px;
+            }
+            
+            .dot.active {
+                height: 16px;
+            }
+            
+            .index-button {
+                right: 45px;
+                bottom: 12px;
+                width: 38px;
+                height: 38px;
+            }
+            
+            .index-button span {
+                width: 14px;
+            }
+            
+            .page-counter {
+                bottom: 12px;
+                font-size: clamp(7px, 0.95vw, 8.5px);
+            }
+            .material-item {
+                align-items: center;
+            }
+            .material-item img {
+                width: 60% !important;
+            }
+            
+            .material-label {
+                font-size: clamp(6.5px, 0.85vw, 8.5px);
+            }
+            
+            .page-materials {
+                padding: 0px;
+            }
+            
+            .page-materials h2 {
+                margin-bottom: 22px;
+                font-size: clamp(7.5px, 0.95vw, 9.5px);
+            }
+            
+            .materials-grid {
+                gap: 13px;
+                height: calc(100% - 65px);
+            }
+            
+            .index-menu-list {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .index-menu-title {
+                font-size: 22px;
+                margin-bottom: 25px;
+            }
+            
+            .index-menu-label {
+                font-size: 11px;
+            }
+            
+            .finish-controls {
+                bottom: 35px;
+                left: 15px;
+                gap: 5px;
+            }
+            
+            .finish-btn {
+                padding: 6px 10px;
+                font-size: 8px;
+            }
+        }
+
+        @media (max-width: 768px) and (orientation: landscape) {
+            .page {
+                width: 93vw;
+                height: 86vh;
+                height: 86dvh;
+                min-width: auto;
+                min-height: auto;
+                max-width: none;
+                max-height: none;
+                padding: 15px;
+            }
+            
+            .magazine-wrapper {
+                padding: 7px;
+                gap: 12px;
+            }
+            
+            .text-three-col {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .finish-controls {
+                bottom: 25px;
+                left: 12px;
+                gap: 4px;
+            }
+            
+            .finish-btn {
+                padding: 5px 8px;
+                font-size: 7px;
+            }
+        }
+
+        @media (min-width: 1920px) {
+            .page {
+                width: 1200px;
+                height: 850px;
+                min-width: 1200px;
+                min-height: 850px;
+                max-width: 1200px;
+                max-height: 850px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Install prompt for fullscreen -->
+    <div class="install-prompt" id="installPrompt">
+        <div class="install-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/>
+            </svg>
+        </div>
+        <h2 class="install-title">Visualizzazione a Schermo Intero</h2>
+        <p class="install-text">
+            Per una visualizzazione completamente a schermo intero,<br>
+            aggiungi questo sito alla schermata home del tuo telefono:
+        </p>
+        <div class="install-steps">
+            <div class="install-step">
+                <div class="step-number">1</div>
+                <div>Clicca sui tre puntini in basso a destra e Tocca il pulsante "Condividi" <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></div>
+            </div>
+            <div class="install-step">
+                <div class="step-number">2</div>
+                <div>Clicca ancora sui tre puntini e Seleziona "Aggiungi alla schermata Home"</div>
+            </div>
+            <div class="install-step">
+                <div class="step-number">3</div>
+                <div>Apri dalla Home Screen per esperienza fullscreen</div>
+            </div>
+             
+        </div>
+        <div class="install-dismiss" onclick="document.getElementById('installPrompt').classList.remove('show')">
+            Continua senza installare
+        </div>
+    </div>
+
+    <!-- Rotation overlay -->
+    <div class="rotate-overlay">
+        <div class="rotate-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12L10.23 1.75zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02-6.36 6.36zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 24 12 24l.66-.03-3.81-3.81-1.33 1.32z"/>
+            </svg>
+        </div>
+        <div class="rotate-text">
+            Ruota il dispositivo in orizzontale<br>per una migliore esperienza
+        </div>
+    </div>
+
+    <div class="main-content">
+        <button class="index-button" id="indexButton">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="index-menu" id="indexMenu">
+            <div class="index-menu-content">
+                <h2 class="index-menu-title">Indice</h2>
+                <ul class="index-menu-list">
+                    <li class="index-menu-item" data-page="0"><div class="index-menu-link"><span class="index-menu-number">01</span><span class="index-menu-label">Cover</span><span class="index-menu-page">Pag. 01</span></div></li>
+                    <li class="index-menu-item" data-page="1"><div class="index-menu-link"><span class="index-menu-number">02</span><span class="index-menu-label">Descrizione</span><span class="index-menu-page">Pag. 02</span></div></li>
+                    <li class="index-menu-item" data-page="2"><div class="index-menu-link"><span class="index-menu-number">03</span><span class="index-menu-label">Materiali I</span><span class="index-menu-page">Pag. 03</span></div></li>
+                    <li class="index-menu-item" data-page="3"><div class="index-menu-link"><span class="index-menu-number">04</span><span class="index-menu-label">Materiali II</span><span class="index-menu-page">Pag. 04</span></div></li>
+                    <li class="index-menu-item" data-page="4"><div class="index-menu-link"><span class="index-menu-number">05</span><span class="index-menu-label">Sala</span><span class="index-menu-page">Pag. 05</span></div></li>
+                    <li class="index-menu-item" data-page="5"><div class="index-menu-link"><span class="index-menu-number">06</span><span class="index-menu-label">Sala Libreria</span><span class="index-menu-page">Pag. 06</span></div></li>
+                    <li class="index-menu-item" data-page="6"><div class="index-menu-link"><span class="index-menu-number">07</span><span class="index-menu-label">Sala Vista I</span><span class="index-menu-page">Pag. 07</span></div></li>
+                    <li class="index-menu-item" data-page="7"><div class="index-menu-link"><span class="index-menu-number">08</span><span class="index-menu-label">Sala Vista II</span><span class="index-menu-page">Pag. 08</span></div></li>
+                    <li class="index-menu-item" data-page="8"><div class="index-menu-link"><span class="index-menu-number">09</span><span class="index-menu-label">Sala TV</span><span class="index-menu-page">Pag. 09</span></div></li>
+                    <li class="index-menu-item" data-page="9"><div class="index-menu-link"><span class="index-menu-number">10</span><span class="index-menu-label">Dettagli</span><span class="index-menu-page">Pag. 10</span></div></li>
+                    <li class="index-menu-item" data-page="10"><div class="index-menu-link"><span class="index-menu-number">11</span><span class="index-menu-label">Sala Views</span><span class="index-menu-page">Pag. 11</span></div></li>
+                    <li class="index-menu-item" data-page="11"><div class="index-menu-link"><span class="index-menu-number">12</span><span class="index-menu-label">Sala Render</span><span class="index-menu-page">Pag. 12</span></div></li>
+                    <li class="index-menu-item" data-page="12"><div class="index-menu-link"><span class="index-menu-number">13</span><span class="index-menu-label">Gipsoteca</span><span class="index-menu-page">Pag. 13</span></div></li>
+                    <li class="index-menu-item" data-page="13"><div class="index-menu-link"><span class="index-menu-number">14</span><span class="index-menu-label">Gipsoteca Vista I</span><span class="index-menu-page">Pag. 14</span></div></li>
+                    <li class="index-menu-item" data-page="14"><div class="index-menu-link"><span class="index-menu-number">15</span><span class="index-menu-label">Gipsoteca Vista II</span><span class="index-menu-page">Pag. 15</span></div></li>
+                    <li class="index-menu-item" data-page="15"><div class="index-menu-link"><span class="index-menu-number">16</span><span class="index-menu-label">Gipsoteca Views</span><span class="index-menu-page">Pag. 16</span></div></li>
+                    <li class="index-menu-item" data-page="16"><div class="index-menu-link"><span class="index-menu-number">17</span><span class="index-menu-label">Gipsoteca Sedie</span><span class="index-menu-page">Pag. 17</span></div></li>
+                    <li class="index-menu-item" data-page="17"><div class="index-menu-link"><span class="index-menu-number">18</span><span class="index-menu-label">Gipsoteca Full</span><span class="index-menu-page">Pag. 18</span></div></li>
+                    <li class="index-menu-item" data-page="18"><div class="index-menu-link"><span class="index-menu-number">19</span><span class="index-menu-label">Ingresso</span><span class="index-menu-page">Pag. 19</span></div></li>
+                    <li class="index-menu-item" data-page="19"><div class="index-menu-link"><span class="index-menu-number">20</span><span class="index-menu-label">Ingresso Raggi</span><span class="index-menu-page">Pag. 20</span></div></li>
+                    <li class="index-menu-item" data-page="20"><div class="index-menu-link"><span class="index-menu-number">21</span><span class="index-menu-label">Affreschi</span><span class="index-menu-page">Pag. 21</span></div></li>
+                    <li class="index-menu-item" data-page="21"><div class="index-menu-link"><span class="index-menu-number">22</span><span class="index-menu-label">Ingresso Render</span><span class="index-menu-page">Pag. 22</span></div></li>
+                    <li class="index-menu-item" data-page="22"><div class="index-menu-link"><span class="index-menu-number">23</span><span class="index-menu-label">Ingresso Dettagli</span><span class="index-menu-page">Pag. 23</span></div></li>
+                    <li class="index-menu-item" data-page="23"><div class="index-menu-link"><span class="index-menu-number">24</span><span class="index-menu-label">Fine</span><span class="index-menu-page">Pag. 24</span></div></li>
+                    <li class="index-menu-item" data-page="24"><div class="index-menu-link"><span class="index-menu-number">25</span><span class="index-menu-label">Patine Antiche</span><span class="index-menu-page">Pag. 25</span></div></li>
+                    <li class="index-menu-item" data-page="25"><div class="index-menu-link"><span class="index-menu-number">26</span><span class="index-menu-label">Patine Vista I</span><span class="index-menu-page">Pag. 26</span></div></li>
+                    <li class="index-menu-item" data-page="26"><div class="index-menu-link"><span class="index-menu-number">27</span><span class="index-menu-label">Patine Vista II</span><span class="index-menu-page">Pag. 27</span></div></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Fullscreen overlay -->
+        <div class="fullscreen-overlay" id="fullscreenOverlay">
+            <div class="fullscreen-close" id="fullscreenClose"></div>
+            
+            <div class="gallery-nav gallery-prev" id="galleryPrev">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+            </div>
+            
+            <div class="fullscreen-content" id="fullscreenContent">
+                <img class="fullscreen-image" id="fullscreenImage" src="" alt="">
+            </div>
+            
+            <div class="gallery-nav gallery-next" id="galleryNext">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                </svg>
+            </div>
+            
+            <div class="gallery-counter" id="galleryCounter">
+                <span id="currentImage">1</span> / <span id="totalImages">1</span>
+            </div>
+        </div>
+
+        <nav class="nav-dots">
+            <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div>
+        </nav>
+        
+        <div class="page-counter"><span class="current">01</span> / 27</div>
+        
+        <div class="magazine-wrapper">
+            <!-- PAGE 1 -->
+            <div class="page page-cover">
+                <div class="cover-top">
+                    <div class="logo">Villa Gandolfo</div>
+                    <img class="cover-img" src="villa-schizzo.webp" alt="Villa Gandolfo">
+                </div>
+                <div class="page-footer"><span>Page 01</span><span></span><span>Bologna - Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 2 -->
+            <div class="page page-text">
+                <h2></h2>
+                <div class="text-three-col">
+                    <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Il progetto interviene sugli interni della villa attraverso una riconfigurazione che integra decorazione delle superfici e ridefinizione funzionale degli spazi. L’approccio si basa sulla stratificazione dei materiali e su un controllo puntuale del rapporto tra le preesistenze storiche e i nuovi elementi inseriti.
+
+</p><p>L’ingresso introduce al progetto attraverso un ciclo di dipinti murali site-specific dedicati alle quattro stagioni. Le raffigurazioni botaniche sono progettate in relazione alle proporzioni architettoniche e allo sviluppo dello spazio.
+Il trattamento delle superfici murarie è affidato a patine a velatura applicate sulle pareti e sulle decorazioni esistenti. L’intervento mira a restituire la profondità cromatica e la consistenza degli intonaci antichi attraverso sovrapposizioni leggere in modo da recuperare l’impronta storica delle superfici.
+</p></div>
+                    <div><p>Negli ambienti della gipsoteca, l’intervento è orientato alla valorizzazione della collezione di opere e degli apparati in gesso tramite un contrasto tonale controllato. Le pareti sono rifinite con patine antiche dai toni scuri e caldi, funzionali a migliorare la leggibilità dei rilievi e delle opere. All’interno di questo contesto, l’inserimento di un tavolo e di sedute dalle geometrie essenziali introduce un confronto diretto tra superfici storiche e arredi contemporanei, definendo lo spazio come sala da pranzo senza alterarne il carattere espositivo.
+La sala living è organizzata per rispondere alla doppia polarità dello spazio, definita dalla presenza del camino su un lato e dell’area multimediale sul lato opposto. Al centro dell’ambiente è collocato un sistema di sedute modulare, progettato per consentire la fruizione di entrambi i fronti. Il sistema integra un mobile TV dotato di meccanismo motorizzato per l’estrazione a scomparsa dello schermo, mantenendo la continuità formale del volume quando non in uso. </p></div>
+                    <div><p>La parete di fondo è definita da un sistema di librerie modulari indipendenti, dimensionate per lasciare liberi i varchi laterali di accesso. Al centro delle librerie, una composizione di specchi antichi su misura contribuisce alla lettura spaziale dell’ambiente e si integra con le patine delle superfici.
+</p><p></p></div>
+                </div>
+                <div class="page-footer"><span>Page 02</span><span>Introduction</span><span>Bologna | Silvia</span></div>
+            </div>
+
+            <!-- PAGE 3 -->
+            <div class="page page-materials">
+                <h2></h2>
+                <div class="materials-grid">
+                    <div class="material-item"><img src="fresco2.webp" alt="Dipinti"><div class="material-label">Dipinti Murali</div></div>
+                    <div class="material-item"><img src="patine.webp" alt="Patine"><div class="material-label">Patine Antiche</div></div>
+                    <div class="material-item"><img src="insp.webp" alt="Dettagli"><div class="material-label">Dettagli in metallo</div></div>
+                </div>
+                <div class="page-footer"><span>Page 03</span><span>Materials</span><span>Bologna | Silvia</span></div>
+            </div>
+
+            <!-- PAGE 4 -->
+            <div class="page page-materials">
+                <h2></h2>
+                <div class="materials-grid">
+                    <div class="material-item"><img src="tappeto-moh.webp" alt="Tappeti"><div class="material-label">Tappeti</div></div>
+                    <div class="material-item"><img src="libreria-brozo.webp" alt="Metalli"><div class="material-label">Metalli</div></div>
+                    <div class="material-item"><img src="specchio-ecom.webp" alt="Specchi"><div class="material-label">Specchi antichi</div></div>
+                </div>
+                <div class="page-footer"><span>Page 04</span><span>Materials</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 5 -->
+            <div class="page page-split">
+                <div class="split-text">
+                    <h3>Sala<br></h3>
+                    <p>Un divano modulare centrale organizza l'ambiente tra il camino e l'area multimediale, dotata di mobile TV con meccanismo motorizzato a scomparsa. Le pareti presentano patine antiche. Completano lo spazio librerie modulari, un sistema di specchi antichi prodotti su misura e un tavolo da fumo.</p>
+                    
+                </div>
+                <div class="split-img"><img src="specchio-div.webp" alt="Sala"></div>
+                <div class="page-footer"><span>Page 05</span><span>Sala</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 6 -->
+            <div class="page page-double">
+                <img class="double-img" src="libreria-brozo.webp" alt="Libreria">
+                <img class="double-img" src="dettaglio-mobile-libreria.webp" alt="Render">
+                <div class="page-footer"><span>Page 06</span><span>Sala</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 7 - NUOVA: Sala Full Image 1 -->
+            <div class="page page-full-img" id="page7">
+                <div class="switchable-img-container" id="page7-container">
+                    <img src="sala-vintage-senzatv-senzadiv.webp" alt="Sala Vista 1">
+                    <img src="sala-brunita-senzatv.webp" alt="Sala Brunita">
+                </div>
+                <div class="img-label">Sala</div>
+                <div class="finish-controls">
+                    <button class="finish-btn active">Metallo spazzolato</button>
+                    <button class="finish-btn">Ottone brunito</button>
+                </div>
+                <div class="page-footer"><span>Page 07</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 8 - NUOVA: Sala Full Image 2 -->
+            <div class="page page-full-img" id="page8">
+                <div class="switchable-img-container" id="page8-container">
+                    <img src="sala-antra-top.webp" alt="Metallico scuro">
+                    <img src="sala-brunita.webp" alt="Sala Brunita Vintage">
+                </div>
+                <div class="img-label">Sala</div>
+                <div class="finish-controls">
+                    <button class="finish-btn active">Metallo spazzolato
+                        to</button>
+                    <button class="finish-btn">Ottone brunito</button>
+                </div>
+                <div class="page-footer"><span>Page 08</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 9 -->
+            <div class="page page-full-img">
+                <img src="sala-divano-fine-contv.webp" alt="Sala TV">
+                <div class="img-label">Sala TV</div>
+                <div class="page-footer"><span>Page 09</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+
+            <!-- PAGE 10 -->
+            <div class="page page-materials">
+                <h2></h2>
+                <div class="materials-grid">
+                    <div class="material-item"><img src="dettaglio.webp" alt="Ruggine"><div class="material-label"></div></div>
+                    <div class="material-item"><img src="ottone-brunito.webp" alt="Ottone brunito"><div class="material-label"></div></div>
+                    <div class="material-item"><img src="ottone-chiaro.webp" alt="Ottone"><div class="material-label"></div></div>
+                </div>
+                <div class="page-footer"><span>Page 04</span><span>Materials</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 11 -->
+            <div class="page page-full-img">
+                <img class="double-img" src="ottone-brunito.webp" alt="Sala">
+                <div class="page-footer"><span>Page 11</span><span>Views</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 12 -->
+            <div class="page page-full-img">
+                <img src="vista-alto.webp" alt="Sala">
+                <div class="img-label">Sala</div>
+                <div class="page-footer"><span>Page 12</span><span>Render</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 13 - Gipsoteca Split -->
+            <div class="page page-split">
+                <div class="split-text">
+                    <h3>Gipsoteca<br></h3>
+                    <p>L'intervento mira a enfatizzare la collezione di opere in gesso attraverso un deciso contrasto tonale. Sulle pareti vengono applicate patine antiche dai toni scuri e caldi. Questa scelta è funzionale alla valorizzazione delle opere e dei rilievi, che emergono con forza rispetto allo sfondo.
+L'accostamento tra il fascino delle patine antiche e l'essenzialità degli arredi definisce la natura attuale del progetto.</p>
+                </div>
+                <div class="split-img"><img src="stucco1.webp" alt="Gipsoteca"></div>
+                <div class="page-footer"><span>Page 13</span><span>Gipsoteca</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 14 - NUOVA: Gipsoteca Full Image 1 -->
+            <div class="page page-full-img">
+                <img src="gipso-tulip-mise-det.webp" alt="Gipsoteca Vista 1">
+                <div class="img-label">Gipsoteca</div>
+                <div class="page-footer"><span>Page 14</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 15 - NUOVA: Gipsoteca Full Image 2 -->
+            <div class="page page-full-img">
+                <img src="gipso-tulip.webp" alt="Gipsoteca Vista 2">
+                <div class="img-label">Gipsoteca</div>
+                <div class="page-footer"><span>Page 15</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 16 -->
+            <div class="page page-double">
+                <img class="double-img" src="stucco1.webp" alt="Stucchi">
+                <img class="double-img" src="soffitto.webp" alt="Soffitto">
+                <div class="page-footer"><span>Page 16</span><span>Views</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 17 -->
+            <div class="page page-double">
+                <img class="double-img" src="sedie.webp" alt="Sedie">
+                <img class="double-img" src="gipsoteca-sedie.webp" alt="Gipsoteca">
+                <div class="page-footer"><span>Page 17</span><span>Gipsoteca</span><span>Bologna | Silvia</span></div>
+            </div>
+
+            <!-- PAGE 18 -->
+            <div class="page page-full-img">
+                <img src="gipsoteca2.webp" alt="Gipsoteca">
+                <div class="img-label">Gipsoteca</div>
+                <div class="page-footer"><span>Page 18</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 19 - Ingresso Split -->
+            <div class="page page-split">
+                <div class="split-text">
+                    <h3>Ingresso<br></h3>
+                    <p>L'ingresso introduce al progetto attraverso un ciclo di dipinti murali site-specific dedicati alle quattro stagioni.</p>
+                </div>
+                <div class="split-img"><img src="raggi.webp" alt="Ingresso"></div>
+                <div class="page-footer"><span>Page 19</span><span>Entrance</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 20-24 -->
+            <div class="page page-full-img"><img src="ingresso-sx.webp" alt="Ingresso"><div class="img-label">Ingresso</div><div class="page-footer"><span>Page 20</span><span>Photography</span><span>Bologna | Silvia</span></div></div>
+            <div class="page page-full-img"><img src="ingresso-affreschi.webp" alt="Affreschi"><div class="img-label">Affreschi</div><div class="page-footer"><span>Page 21</span><span>Photography</span><span>Bologna | Silvia</span></div></div>
+            <div class="page page-full-img"><img src="ingresso-render.webp" alt="Render"><div class="img-label">Render</div><div class="page-footer"><span>Page 22</span><span>Photography</span><span>Bologna | Silvia</span></div></div>
+            <div class="page page-materials"><h2></h2><div class="materials-grid"><div class="material-item"><img src="raggi.webp" alt="Dipinti"><div class="material-label">Dipinti Murali</div></div><div class="material-item"><img src="ingresso-sx.webp" alt="Stagioni"><div class="material-label">Stagioni</div></div><div class="material-item"><img src="giardino-segreto.webp" alt="Dettagli"><div class="material-label">Dettagli</div></div></div><div class="page-footer"><span>Page 23</span><span>Details</span><span>Bologna | Silvia</span></div></div>
+                        
+            <!-- PAGE 25 - NUOVA: Patine Antiche Split -->
+            <div class="page page-split">
+                <div class="split-text">
+                    <h3>Patine Antiche<br></h3>
+                    <p>Le pareti della sala e le decorazioni preesistenti vengono rielaborate attraverso l'applicazione di patine a velatura per restituire la consistenza degli intonaci antichi.</p>
+                </div>
+                <div class="split-img"><img src="patine-antiche1(1).webp" alt="Patine Antiche"></div>
+                <div class="page-footer"><span>Page 25</span><span>Patine Antiche</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 26 - NUOVA: Patine Full Image 1 -->
+            <div class="page page-double">
+                <img class="double-img" src="inspiration-patine2.webp" alt="Patine">
+                <img class="double-img" src="inspiration-patine-3.webp" alt="Boiserie">
+                <div class="img-label">Patine Antiche</div>
+                <div class="page-footer"><span>Page 26</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+            
+            <!-- PAGE 26 - NUOVA: Patine Full Image 1 -->
+            <div class="page page-double">
+                <img class="double-img" src="boiserie-patine(1).webp" alt="Patine">
+                <img class="double-img" src="patine-dettaglio.webp" alt="Boiserie">
+                <div class="img-label">Patine Antiche</div>
+                <div class="page-footer"><span>Page 26</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+
+            <!-- PAGE 27 - NUOVA: Patine Full Image 2 -->
+            <div class="page page-full-img">
+                <img src="fine.webp" alt="Dettaglio Texture">
+                <div class="img-label">Patine Antiche</div>
+                <div class="page-footer"><span>Page 27</span><span>Photography</span><span>Bologna | Silvia</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CRITICAL: Aggressive fullscreen technique
+        (function() {
+            const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isLandscape = () => window.matchMedia('(orientation: landscape)').matches;
+            
+            // Show install prompt if on iOS and not standalone
+            if (isIOS && !isStandalone && isLandscape()) {
+                setTimeout(() => {
+                    document.getElementById('installPrompt').classList.add('show');
+                }, 2000);
+            }
+            
+            // Force scroll to hide Safari bar - AGGRESSIVE
+            function aggressiveHideBar() {
+                window.scrollTo(0, 1);
+                setTimeout(() => window.scrollTo(0, 0), 20);
+                
+                // Set exact height
+                const page = document.getElementById('page');
+                if (page) {
+                    const height = window.innerHeight;
+                    document.body.style.height = (height + 60) + 'px';
+                    document.documentElement.style.height = (height + 60) + 'px';
+                }
+            }
+            
+            // Run multiple times on load
+            window.addEventListener('load', () => {
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(aggressiveHideBar, i * 200);
+                }
+            });
+            
+            // Run on orientation change
+            window.addEventListener('orientationchange', () => {
+                setTimeout(aggressiveHideBar, 100);
+                setTimeout(aggressiveHideBar, 300);
+                setTimeout(aggressiveHideBar, 500);
+                setTimeout(aggressiveHideBar, 800);
+            });
+            
+            // Update on resize
+            window.addEventListener('resize', () => {
+                const wrapper = document.querySelector('.magazine-wrapper');
+                if (wrapper) {
+                    wrapper.style.height = window.innerHeight + 'px';
+                }
+            });
+        })();
+        
+        // Portfolio navigation
+        const wrapper = document.querySelector('.magazine-wrapper');
+        const dots = document.querySelectorAll('.dot');
+        const currentNum = document.querySelector('.current');
+        const indexButton = document.getElementById('indexButton');
+        const indexMenu = document.getElementById('indexMenu');
+        const indexMenuItems = document.querySelectorAll('.index-menu-item');
+        
+        let current = 0;
+        let totalPages = 27;
+        let isAnimating = false;
+        
+        function getPageWidth() {
+            const page = document.querySelector('.page');
+            if (page) {
+                // Get the actual computed width including all spacing
+                const rect = page.getBoundingClientRect();
+                const wrapperStyle = window.getComputedStyle(wrapper);
+                const gap = parseFloat(wrapperStyle.gap) || 0;
+                
+                // Return exact width + gap for precise positioning
+                return rect.width + gap;
+            }
+            return 1150;
+        }
+        
+        function goToPage(index) {
+            if (isAnimating || index < 0 || index >= totalPages) return;
+            
+            isAnimating = true;
+            current = index;
+            
+            // Calculate exact position with current measurements
+            const pageWidth = getPageWidth();
+            const offset = current * pageWidth;
+            
+            wrapper.style.transform = `translateX(-${offset}px)`;
+            
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === current);
+            });
+            
+            currentNum.textContent = String(current + 1).padStart(2, '0');
+            
+            setTimeout(() => { isAnimating = false; }, 800);
+        }
+        
+        // Index menu
+        indexButton.addEventListener('click', () => {
+            indexButton.classList.toggle('active');
+            indexMenu.classList.toggle('active');
+        });
+
+        indexMenuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                goToPage(parseInt(item.getAttribute('data-page')));
+                indexButton.classList.remove('active');
+                indexMenu.classList.remove('active');
+            });
+        });
+
+        // Navigation
+        document.addEventListener('keydown', (e) => {
+            if (indexMenu.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    indexButton.classList.remove('active');
+                    indexMenu.classList.remove('active');
+                }
+                return;
+            }
+            
+            if (e.key === 'ArrowRight') goToPage(current + 1);
+            if (e.key === 'ArrowLeft') goToPage(current - 1);
+            if (e.key === 'Home') goToPage(0);
+            if (e.key === 'End') goToPage(totalPages - 1);
+        });
+        
+        // Wheel
+        let scrollTimeout;
+        document.addEventListener('wheel', (e) => {
+            if (indexMenu.classList.contains('active')) return;
+            e.preventDefault();
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => goToPage(current + (e.deltaY > 0 ? 1 : -1)), 50);
+        }, { passive: false });
+        
+        // Dots
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => goToPage(index));
+        });
+        
+        // Touch
+        let touchStartX = 0, touchStartY = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+            if (indexMenu.classList.contains('active')) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', (e) => {
+            if (indexMenu.classList.contains('active')) return;
+            
+            const diffX = touchStartX - e.changedTouches[0].clientX;
+            const diffY = touchStartY - e.changedTouches[0].clientY;
+            
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                goToPage(current + (diffX > 0 ? 1 : -1));
+            }
+        }, { passive: true });
+        
+        // Resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Recalculate and reposition to current page
+                const pageWidth = getPageWidth();
+                const offset = current * pageWidth;
+                wrapper.style.transform = `translateX(-${offset}px)`;
+            }, 250);
+        });
+        
+        // Prevent pull-to-refresh
+        let lastY = 0;
+        document.addEventListener('touchstart', (e) => { lastY = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchmove', (e) => {
+            const y = e.touches[0].clientY;
+            if (window.scrollY === 0 && y > lastY) e.preventDefault();
+        }, { passive: false });
+        
+        // Fullscreen image gallery
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        const fullscreenContent = document.getElementById('fullscreenContent');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+        const fullscreenClose = document.getElementById('fullscreenClose');
+        const galleryPrev = document.getElementById('galleryPrev');
+        const galleryNext = document.getElementById('galleryNext');
+        const galleryCounter = document.getElementById('galleryCounter');
+        const currentImageSpan = document.getElementById('currentImage');
+        const totalImagesSpan = document.getElementById('totalImages');
+        
+        let currentGalleryImages = [];
+        let currentGalleryIndex = 0;
+        
+        function extractImagesFromPage(pageElement) {
+            const images = [];
+            
+            // Find all img elements in the page
+            const imgElements = pageElement.querySelectorAll('img');
+            
+            imgElements.forEach(img => {
+                // Skip very small images (likely icons)
+                if (img.naturalWidth > 50 && img.naturalHeight > 50) {
+                    images.push(img.src);
+                }
+            });
+            
+            return images;
+        }
+        
+        function showGalleryImage(index) {
+            if (currentGalleryImages.length === 0) return;
+            
+            // Wrap around
+            if (index < 0) index = currentGalleryImages.length - 1;
+            if (index >= currentGalleryImages.length) index = 0;
+            
+            currentGalleryIndex = index;
+            fullscreenImage.src = currentGalleryImages[index];
+            
+            // Update counter
+            currentImageSpan.textContent = index + 1;
+            totalImagesSpan.textContent = currentGalleryImages.length;
+            
+            // Show/hide navigation based on number of images
+            if (currentGalleryImages.length > 1) {
+                galleryPrev.classList.add('active');
+                galleryNext.classList.add('active');
+                galleryCounter.classList.add('active');
+            } else {
+                galleryPrev.classList.remove('active');
+                galleryNext.classList.remove('active');
+                galleryCounter.classList.remove('active');
+            }
+        }
+        
+        function openFullscreen(pageElement, clickedImageSrc = null) {
+            // Extract all images from the page
+            currentGalleryImages = extractImagesFromPage(pageElement);
+            
+            // If no images found, don't open fullscreen
+            if (currentGalleryImages.length === 0) {
+                console.log('No images found in this page');
+                return;
+            }
+            
+            // Find the index of the clicked image, or start with first
+            currentGalleryIndex = 0;
+            if (clickedImageSrc) {
+                const clickedIndex = currentGalleryImages.indexOf(clickedImageSrc);
+                if (clickedIndex !== -1) {
+                    currentGalleryIndex = clickedIndex;
+                }
+            }
+            
+            // Show the clicked image (or first image)
+            showGalleryImage(currentGalleryIndex);
+            
+            // Show overlay with slight delay for smooth transition
+            requestAnimationFrame(() => {
+                fullscreenOverlay.classList.add('active');
+            });
+            
+            // Prevent scrolling on main content
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeFullscreen() {
+            // Remove active class to trigger fade out
+            fullscreenOverlay.classList.remove('active');
+            
+            // Re-enable scrolling
+            document.body.style.overflow = '';
+            
+            // Clear gallery after transition completes
+            setTimeout(() => {
+                currentGalleryImages = [];
+                currentGalleryIndex = 0;
+                fullscreenImage.src = '';
+            }, 300);
+        }
+        
+        // Add click listeners to all images in pages
+        document.addEventListener('DOMContentLoaded', () => {
+            const pages = document.querySelectorAll('.magazine-wrapper .page');
+            
+            pages.forEach(page => {
+                // Add click listener to all images in the page
+                const images = page.querySelectorAll('img');
+                
+                images.forEach(img => {
+                    img.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        // Don't open if it's a very small image (likely an icon)
+                        if (img.naturalWidth < 50 || img.naturalHeight < 50) return;
+                        
+                        // Open fullscreen starting with the clicked image
+                        openFullscreen(page, img.src);
+                    });
+                });
+            });
+        });
+        
+        // Gallery navigation
+        galleryPrev.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showGalleryImage(currentGalleryIndex - 1);
+        });
+        
+        galleryNext.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showGalleryImage(currentGalleryIndex + 1);
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!fullscreenOverlay.classList.contains('active')) return;
+            
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                showGalleryImage(currentGalleryIndex - 1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                showGalleryImage(currentGalleryIndex + 1);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                closeFullscreen();
+            }
+        });
+        
+        // Close fullscreen on close button click
+        fullscreenClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            closeFullscreen();
+        });
+        
+        // Close fullscreen on overlay click (but not on image or controls)
+        fullscreenOverlay.addEventListener('click', (e) => {
+            if (e.target === fullscreenOverlay || e.target === fullscreenContent) {
+                e.preventDefault();
+                closeFullscreen();
+            }
+        });
+        
+        // Finish switcher functionality with clean bidirectional slide animation
+        function setupFinishSwitcher(pageId, containerId) {
+            const page = document.getElementById(pageId);
+            if (!page) return;
+            
+            const container = document.getElementById(containerId);
+            const images = container.querySelectorAll('img');
+            const buttons = page.querySelectorAll('.finish-btn');
+            
+            let currentIndex = 0;
+            let isAnimating = false;
+            
+            // Initialize: set all images off-screen to the right except the first
+            images.forEach((img, index) => {
+                if (index === 0) {
+                    img.style.transform = 'translateX(0)';
+                } else {
+                    img.classList.add('no-transition');
+                    img.style.transform = 'translateX(100%)';
+                    // Remove no-transition class after a frame to enable future transitions
+                    requestAnimationFrame(() => {
+                        img.classList.remove('no-transition');
+                    });
+                }
+            });
+            
+            function slideTo(targetIndex) {
+                if (targetIndex === currentIndex || isAnimating) return;
+                
+                isAnimating = true;
+                
+                const currentImg = images[currentIndex];
+                const targetImg = images[targetIndex];
+                const isForward = targetIndex > currentIndex;
+                
+                // Step 1: Position the target image off-screen (without animation)
+                targetImg.classList.add('no-transition');
+                if (isForward) {
+                    // Coming from right
+                    targetImg.style.transform = 'translateX(100%)';
+                } else {
+                    // Coming from left
+                    targetImg.style.transform = 'translateX(-100%)';
+                }
+                
+                // Step 2: Force a reflow to ensure the position is set
+                targetImg.offsetHeight;
+                
+                // Step 3: Remove no-transition to enable animation
+                targetImg.classList.remove('no-transition');
+                
+                // Step 4: Animate both images
+                requestAnimationFrame(() => {
+                    // Move current image off-screen
+                    if (isForward) {
+                        currentImg.style.transform = 'translateX(-100%)';
+                    } else {
+                        currentImg.style.transform = 'translateX(100%)';
+                    }
+                    
+                    // Move target image to center
+                    targetImg.style.transform = 'translateX(0)';
+                });
+                
+                // Update current index and re-enable interaction after animation
+                setTimeout(() => {
+                    currentIndex = targetIndex;
+                    isAnimating = false;
+                }, 600);
+            }
+            
+            // Attach button click handlers
+            buttons.forEach((btn, index) => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Update button states
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Slide to target
+                    slideTo(index);
+                });
+            });
+        }
+        
+        // Initialize finish switchers for pages 7 and 8
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFinishSwitcher('page7', 'page7-container');
+            setupFinishSwitcher('page8', 'page8-container');
+        });
+    </script>
+</body>
+</html>
