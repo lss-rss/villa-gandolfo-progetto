@@ -64,6 +64,7 @@
             color: #fff;
             padding: 40px;
             text-align: center;
+            overflow-y: auto;
         }
         
         .install-prompt.show {
@@ -141,6 +142,97 @@
         
         .install-dismiss:hover {
             color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Responsive per landscape mobile */
+        @media (max-width: 1024px) and (orientation: landscape) {
+            .install-prompt {
+                padding: 15px 20px;
+                justify-content: flex-start;
+                padding-top: 10px;
+            }
+            
+            .install-icon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 8px;
+            }
+            
+            .install-title {
+                font-size: 14px;
+                margin-bottom: 6px;
+                letter-spacing: 0;
+            }
+            
+            .install-text {
+                font-size: 10px;
+                line-height: 1.3;
+                margin-bottom: 10px;
+                max-width: 95%;
+            }
+            
+            .install-text br {
+                display: none;
+            }
+            
+            .install-steps {
+                padding: 10px 15px;
+                max-width: 95%;
+                border-radius: 6px;
+            }
+            
+            .install-step {
+                margin-bottom: 8px;
+                font-size: 9px;
+                align-items: flex-start;
+                line-height: 1.2;
+            }
+            
+            .install-step:last-child {
+                margin-bottom: 0;
+            }
+            
+            .step-number {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+                margin-right: 8px;
+                flex-shrink: 0;
+            }
+            
+            .install-dismiss {
+                margin-top: 10px;
+                font-size: 9px;
+                padding-bottom: 10px;
+            }
+        }
+        
+        @media (max-width: 768px) and (orientation: landscape) {
+            .install-title {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            
+            .install-text {
+                font-size: 9px;
+                margin-bottom: 8px;
+            }
+            
+            .install-steps {
+                padding: 8px 12px;
+            }
+            
+            .install-step {
+                font-size: 8px;
+                margin-bottom: 6px;
+            }
+            
+            .step-number {
+                width: 18px;
+                height: 18px;
+                font-size: 9px;
+                margin-right: 6px;
+            }
         }
         
         /* Rotation overlay */
@@ -963,6 +1055,33 @@
             opacity: 0.4;
         }
 
+        /* Test button for install prompt */
+        .test-install-btn {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            font-size: 11px;
+            cursor: pointer;
+            z-index: 999;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-install-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        @media (min-width: 1024px) {
+            .test-install-btn {
+                display: none;
+            }
+        }
+
         /* MOBILE LANDSCAPE */
         @media (max-width: 1024px) and (orientation: landscape) {
             .magazine-wrapper {
@@ -1219,21 +1338,20 @@
         </div>
         <h2 class="install-title">Visualizzazione a Schermo Intero</h2>
         <p class="install-text">
-            Per una visualizzazione completamente a schermo intero,<br>
-            aggiungi questo sito alla schermata home del tuo telefono:
+            Per visualizzare a schermo intero, aggiungi questo sito alla home del telefono:
         </p>
         <div class="install-steps">
             <div class="install-step">
                 <div class="step-number">1</div>
-                <div>Clicca sui tre puntini in basso a destra e Tocca il pulsante "Condividi" <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></div>
+                <div>Clicca sui tre puntini in basso a destra e poi "Condividi"</div>
             </div>
             <div class="install-step">
                 <div class="step-number">2</div>
-                <div>Clicca ancora sui tre puntini e Seleziona "Aggiungi alla schermata Home"</div>
+                <div>Clicca di nuovo sui tre puntini e seleziona "Aggiungi alla Home"</div>
             </div>
             <div class="install-step">
                 <div class="step-number">3</div>
-                <div>Apri dalla Home Screen per esperienza fullscreen</div>
+                <div>Apri dalla Home Screen</div>
             </div>
              
         </div>
@@ -1253,6 +1371,9 @@
             Ruota il dispositivo in orizzontale<br>per una migliore esperienza
         </div>
     </div>
+
+    <!-- Test Install Button -->
+    <button class="test-install-btn" onclick="document.getElementById('installPrompt').classList.add('show')">📱 Test Install Prompt</button>
 
     <div class="main-content">
         <button class="index-button" id="indexButton">
@@ -1346,14 +1467,14 @@
             <div class="page page-text">
                 <h2></h2>
                 <div class="text-three-col">
-                    <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Il progetto interviene sugli interni della villa attraverso una riconfigurazione che integra decorazione delle superfici e ridefinizione funzionale degli spazi. L’approccio si basa sulla stratificazione dei materiali e su un controllo puntuale del rapporto tra le preesistenze storiche e i nuovi elementi inseriti.
+                    <div><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Il progetto interviene sugli interni della villa attraverso una riconfigurazione che integra decorazione delle superfici e ridefinizione funzionale degli spazi. L'approccio si basa sulla stratificazione dei materiali e su un controllo puntuale del rapporto tra le preesistenze storiche e i nuovi elementi inseriti.
 
-</p><p>L’ingresso introduce al progetto attraverso un ciclo di dipinti murali site-specific dedicati alle quattro stagioni. Le raffigurazioni botaniche sono progettate in relazione alle proporzioni architettoniche e allo sviluppo dello spazio.
-Il trattamento delle superfici murarie è affidato a patine a velatura applicate sulle pareti e sulle decorazioni esistenti. L’intervento mira a restituire la profondità cromatica e la consistenza degli intonaci antichi attraverso sovrapposizioni leggere in modo da recuperare l’impronta storica delle superfici.
+</p><p>L'ingresso introduce al progetto attraverso un ciclo di dipinti murali site-specific dedicati alle quattro stagioni. Le raffigurazioni botaniche sono progettate in relazione alle proporzioni architettoniche e allo sviluppo dello spazio.
+Il trattamento delle superfici murarie è affidato a patine a velatura applicate sulle pareti e sulle decorazioni esistenti. L'intervento mira a restituire la profondità cromatica e la consistenza degli intonaci antichi attraverso sovrapposizioni leggere in modo da recuperare l'impronta storica delle superfici.
 </p></div>
-                    <div><p>Negli ambienti della gipsoteca, l’intervento è orientato alla valorizzazione della collezione di opere e degli apparati in gesso tramite un contrasto tonale controllato. Le pareti sono rifinite con patine antiche dai toni scuri e caldi, funzionali a migliorare la leggibilità dei rilievi e delle opere. All’interno di questo contesto, l’inserimento di un tavolo e di sedute dalle geometrie essenziali introduce un confronto diretto tra superfici storiche e arredi contemporanei, definendo lo spazio come sala da pranzo senza alterarne il carattere espositivo.
-La sala living è organizzata per rispondere alla doppia polarità dello spazio, definita dalla presenza del camino su un lato e dell’area multimediale sul lato opposto. Al centro dell’ambiente è collocato un sistema di sedute modulare, progettato per consentire la fruizione di entrambi i fronti. Il sistema integra un mobile TV dotato di meccanismo motorizzato per l’estrazione a scomparsa dello schermo, mantenendo la continuità formale del volume quando non in uso. </p></div>
-                    <div><p>La parete di fondo è definita da un sistema di librerie modulari indipendenti, dimensionate per lasciare liberi i varchi laterali di accesso. Al centro delle librerie, una composizione di specchi antichi su misura contribuisce alla lettura spaziale dell’ambiente e si integra con le patine delle superfici.
+                    <div><p>Negli ambienti della gipsoteca, l'intervento è orientato alla valorizzazione della collezione di opere e degli apparati in gesso tramite un contrasto tonale controllato. Le pareti sono rifinite con patine antiche dai toni scuri e caldi, funzionali a migliorare la leggibilità dei rilievi e delle opere. All'interno di questo contesto, l'inserimento di un tavolo e di sedute dalle geometrie essenziali introduce un confronto diretto tra superfici storiche e arredi contemporanei, definendo lo spazio come sala da pranzo senza alterarne il carattere espositivo.
+La sala living è organizzata per rispondere alla doppia polarità dello spazio, definita dalla presenza del camino su un lato e dell'area multimediale sul lato opposto. Al centro dell'ambiente è collocato un sistema di sedute modulare, progettato per consentire la fruizione di entrambi i fronti. Il sistema integra un mobile TV dotato di meccanismo motorizzato per l'estrazione a scomparsa dello schermo, mantenendo la continuità formale del volume quando non in uso. </p></div>
+                    <div><p>La parete di fondo è definita da un sistema di librerie modulari indipendenti, dimensionate per lasciare liberi i varchi laterali di accesso. Al centro delle librerie, una composizione di specchi antichi su misura contribuisce alla lettura spaziale dell'ambiente e si integra con le patine delle superfici.
 </p><p></p></div>
                 </div>
                 <div class="page-footer"><span>Page 02</span><span>Introduction</span><span>Bologna | Silvia</span></div>
@@ -1561,13 +1682,28 @@ L'accostamento tra il fascino delle patine antiche e l'essenzialità degli arred
         (function() {
             const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            const isLandscape = () => window.matchMedia('(orientation: landscape)').matches;
             
-            // Show install prompt if on iOS and not standalone
-            if (isIOS && !isStandalone && isLandscape()) {
-                setTimeout(() => {
-                    document.getElementById('installPrompt').classList.add('show');
-                }, 2000);
+            // Funzione per mostrare il prompt
+            function showInstallPrompt() {
+                const prompt = document.getElementById('installPrompt');
+                if (prompt && !isStandalone && isIOS) {
+                    console.log('Mostrando install prompt...');
+                    prompt.classList.add('show');
+                }
+            }
+            
+            // Mostra il prompt dopo che la pagina è caricata
+            if (isIOS && !isStandalone) {
+                // Prova subito
+                setTimeout(showInstallPrompt, 1000);
+                // E anche dopo l'orientamento landscape
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(showInstallPrompt, 500);
+                });
+                // E quando la pagina è completamente caricata
+                window.addEventListener('load', () => {
+                    setTimeout(showInstallPrompt, 1500);
+                });
             }
             
             // Force scroll to hide Safari bar - AGGRESSIVE
